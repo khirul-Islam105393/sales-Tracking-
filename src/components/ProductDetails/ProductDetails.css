@@ -1,0 +1,59 @@
+.inputText{
+ outline: none;
+ margin-right: 20px;
+font-family: 'Courier New', Courier, monospace;
+
+}
+.add-btn{
+    height: 30px;
+    width: 10%;
+    background-color: rgb(19, 93, 255);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-shadow: 0px 5px 10px #a8b1ff;
+    padding: 0 1rem;
+  }
+.deposit-btn{
+    height: 30px;
+    width: 10%;
+    background-color: darkmagenta;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-shadow: 0px 5px 10px #a8b1ff;
+    padding: 0 1rem;
+  }
+.edit-btn{
+   
+    background-color: rgb(19, 93, 255);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-shadow: 0px 5px 10px #a8b1ff;
+    padding: 0 1rem;
+  }
+.delete-btn{
+   
+    /* background-color: rgb(19, 93, 255); */
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-shadow: 0px 5px 10px #a8b1ff;
+    padding: 0 1rem;
+  }
+.update-btn{
+   
+    background-color: green;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-shadow: 0px 5px 10px #a8b1ff;
+    padding: 0 1rem;
+  }
