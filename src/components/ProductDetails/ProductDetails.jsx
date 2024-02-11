@@ -1,113 +1,9 @@
-// import React, { useState } from 'react';
-
-// const ProductDetails = () => {
-//   const [productName, setProductName] = useState("");
-//   const [price, setPrice] = useState("");
-//   const [weight, setWeight] = useState("");
-//   const [quantity, setQuantity] = useState("");
-//   const [totalPrice, setTotalPrice] = useState("");
-//   const [products, setProducts] = useState([]);
-
-//   const calculateTotal = (e) => {
-//     const inputQuantity = e.target.value;
-//     if (!inputQuantity) return 'Please insert any quantity';
-//     else {
-//         setQuantity(inputQuantity);
-//         setTotalPrice(price * inputQuantity);
-//     }
-// };
-
-//   const disPlayProductDetails = (e) => {
-//     const inputProduct = e.target.value.toUpperCase();
-
-//     let defaultPrice = 0;
-//     let defaultWeight = 0;
-//     if(!inputProduct)return
-//     if (inputProduct === "SS" || inputProduct === "SG") {
-//       defaultPrice = 3182;
-//       defaultWeight = 50;
-//     }
-//     setPrice(defaultPrice);
-//     setWeight(defaultWeight*quantity);
-//     setProductName(inputProduct);
-//   };
-
-//   const addProduct = () => {
-//     if (!productName ||  !quantity) {
-//       return; // If any input field is empty, do nothing
-//     }
-
-//     const product = {
-//       name: productName,
-//       price: price,
-//       weight: weight,
-//       quantity: quantity,
-//       totalPrice: totalPrice,
-//     };
-//     setProducts([...products, product]);
-//     // Resetting the form after adding the product
-//     setProductName("");
-//     setPrice("");
-//     setWeight("");
-//     setQuantity("");
-//     setTotalPrice("");
-//   };
-
-//   return (
-//     <div className="mt-9 border-red-400">
-//       <input
-//         type="text"
-//         className="rounded shadow p-1 inputText"
-//         value={productName}
-//         onChange={disPlayProductDetails}
-//       />
-//       <input
-//         type="number"
-//         className="rounded shadow p-1 inputText"
-//         value={quantity}
-//         onChange={calculateTotal}
-//       />
-//       <button onClick={addProduct}>Add Product</button>
-
-//         <div className="border-red-500">
-//           <table className="border-collapse border border-slate-500 ...">
-//             <thead>
-//               <tr>
-//                 <th className="border border-slate-600 ...">Name</th>
-//                 <th className="border border-slate-600 ...">Price</th>
-//                 <th className="border border-slate-600 ...">Weight</th>
-//                 <th className="border border-slate-600 ...">Total Price</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {products.map((product, index) => (
-//                 <tr key={index}>
-//                   <td className="border border-slate-700 ...">{product.name}</td>
-//                   <td className="border border-slate-700 ...">{product.price}</td>
-//                   <td className="border border-slate-700 ...">{product.weight}</td>
-//                   <td className="border border-slate-700 ...">{product.totalPrice}</td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//             <tfoot>
-//       <tr>
-//         <td className="border border-slate-600 ..."></td>
-//         <td className="border border-slate-600 ..."></td>
-//         <td className="border border-slate-600 ..."> {products.reduce((acc, curr) => acc + curr.weight, 0) / 1000}</td>
-//         <td className="border border-slate-600 ...">{products.reduce((acc, curr) => acc + curr.totalPrice, 0)}</td>
-//       </tr>
-//     </tfoot>
-//           </table>
-//         </div>
-
-//     </div>
-//   );
-// };
-
-// export default ProductDetails;
-
 import React, { useState, useEffect } from "react";
+import {getCurrentDate} from "../utility/getCurrentDate"
 import "./ProductDetails.css";
+import { postData,deleteProduct } from "../utility/api";
+// import { postData } from "../utility/api";
+
 const ProductDetails = () => {
   const [productName, setProductName] = useState("");
   const [price, setPrice] = useState(0);
@@ -117,7 +13,14 @@ const ProductDetails = () => {
   const [products, setProducts] = useState([]);
   const [bankName, setBankName] = useState("");
   const [depositedAmount, setDepositedAmount] = useState(0);
+  const [totalDepositedAmount, setTotalDepositedAmount] = useState(0);
+  const [reload, setReload] = useState(false);
   // Update weight when quantity changes
+
+
+
+
+
 
   useEffect(() => {
     if (quantity) {
@@ -127,6 +30,56 @@ const ProductDetails = () => {
     }
   }, [quantity]);
 
+  useEffect(() => {
+    // Calculate the updated total deposited amount
+    const updatedTotalDepositedAmount = products.reduce((total, item) => {
+      if (typeof item.deposit === "number") {
+        return total + item.deposit;
+      }
+      return total;
+    }, 0);
+  
+    // Update the state with the new total deposited amount
+    setTotalDepositedAmount(updatedTotalDepositedAmount);
+  }, [products, reload]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/sale');
+        if (response.ok) {
+          const fetchedData = await response.json();
+      
+          setProducts(fetchedData);
+        } else {
+          throw new Error('Failed to fetch data');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error.message);
+        // Handle error (e.g., display error message to user)
+      }
+    };
+
+    fetchData();
+  }, [reload]);
+
+ 
+  const handleDeleteProduct = async (productId) => {
+    
+    const success = await deleteProduct(productId);
+   
+
+    if (success) {
+      setReload(!reload);
+    }
+    setTimeout(()=>{
+      setReload(!reload);
+    },2000)
+    
+};
+
+  // Other code...
+
   const calculateTotal = (e) => {
     const inputQuantity = e.target.value;
 
@@ -134,6 +87,9 @@ const ProductDetails = () => {
     setTotalPrice(parseFloat(price) * inputQuantity);
   };
 
+
+
+  
   const disPlayProductDetails = (e) => {
     const inputProduct = e.target.value.toUpperCase();
 
@@ -148,57 +104,87 @@ const ProductDetails = () => {
     // Weight will be updated through useEffect based on quantity
     setProductName(inputProduct);
   };
+  
 
-  const addProduct = () => {
-    if (!productName || !quantity) {
-      return; // If any input field is empty, do nothing
-    }
+  const addProduct = async() => {
+    const upperCaseProductName = productName.toUpperCase();
+    if (!upperCaseProductName || !quantity) return;
+    if (upperCaseProductName !== "SS" && upperCaseProductName !== "SG") return;
 
     const product = {
+      date: getCurrentDate(),
       name: productName,
       price: price,
       weight: weight,
       quantity: quantity,
       totalPrice: totalPrice,
-     
     };
-    setProducts([...products, product]);
+ 
+    
+    
+   const res = await postData(product)
+   if (res) {
+    setReload(!reload);
+  }
+   
     // Resetting the form after adding the product
     setProductName("");
     setPrice(0);
     setQuantity(0);
     setTotalPrice(0);
   };
- 
-  const depositAmount = () => {
+
+  const depositAmount = async() => {
     if (!bankName || !depositedAmount) {
       return; // If any input field is empty, do nothing
     }
-    setDepositedAmount(parseInt(depositAmount));
-    setBankName(bankName);
-
 
     const deposit = {
-      name: '',
+      date: getCurrentDate(),
+      name: "",
       price: 0,
       weight: 0,
       quantity: 0,
       totalPrice: 0,
-      bank:bankName,
-      deposit: parseFloat(depositedAmount),
+      bank: bankName,
+      deposit: parseInt(depositedAmount),
     };
+
+    //fetch api is used to call data 
+    
+    const res = await postData(deposit)
+
+    if (res) {
+      setReload(!reload);
+    }
+    setDepositedAmount(parseInt(depositAmount));
+    setBankName(bankName);
     setProducts([...products, deposit]);
     // Resetting the form after adding the product
-  
-    setBankName('')
-    setDepositedAmount(0)
-    
+    setTotalDepositedAmount(totalDepositedAmount + parseInt(depositedAmount));
+    setBankName("");
+    setDepositedAmount(0);
   };
 
+  console.log(products);
 
-  
+  const totalDepositAmount = products.reduce((total, item) => {
+    if (typeof item.deposit == "number") {
+      return total + item.deposit;
+    }
+    return total;
+  }, 0);
+ // Calculate total price
+const totalPriceSum = products.reduce((acc, curr) => {
+  if (!isNaN(curr.totalPrice)) {
+    return acc + curr.totalPrice;
+  } else {
+    return acc; // Skip invalid values
+  }
+}, 0);
 
-
+// Guard against division by zero
+const totalAfterDeposit = totalPriceSum !== 0 ? totalPriceSum - totalDepositedAmount : 0;
 
   return (
     <div className="mt-9 border-red-400">
@@ -210,7 +196,6 @@ const ProductDetails = () => {
           value={productName}
           onChange={disPlayProductDetails}
           placeholder=" prouduct name"
-
         />
         <input
           type="number"
@@ -227,7 +212,6 @@ const ProductDetails = () => {
       {/* Deposit part */}
 
       <div className="mt-5">
-       
         <input
           type="text"
           className=" rounded shadow p-1 inputText"
@@ -248,40 +232,45 @@ const ProductDetails = () => {
       </div>
 
       <div className="border-red-500 flex justify-center items-center mt-20">
-      <h1>Deposited Money:{}</h1>
         <table className="border-collapse border border-slate-500 ...">
           <thead className="bg-amber-300">
             <tr className="">
+              <th className=" p-2 border border-slate-600 ...">Date</th>
               <th className=" p-2 border border-slate-600 ...">Name</th>
               <th className=" p-2 border border-slate-600 ...">Price</th>
+              <th className="p-2 border border-slate-600 ...">Quantity</th>
               <th className="p-2 border border-slate-600 ...">Weight</th>
               <th className="p-2 border border-slate-600 ...">Bank Name</th>
-              <th className="p-2 border border-slate-600 ...">Deposited Amount</th>
+              <th className="p-2 border border-slate-600 ...">
+                Deposited Amount
+              </th>
               <th className="p-2 border border-slate-600 ...">Total Price</th>
               <th className="p-2 border border-slate-600 ...">Action</th>
             </tr>
           </thead>
           <tbody className="bg-amber-100">
             {products.map((product, index) => (
-              <tr key={index}>
+              <tr key={product._id}>
+                <td className="border border-slate-700 font-sans px-3 ...">{product.date}</td>
                 <td className="border border-slate-700 ...">{product.name}</td>
                 <td className="border border-slate-700 ...">{product.price}</td>
                 <td className="border border-slate-700 ...">
-                  {product.weight}
+                  {product.quantity}
                 </td>
                 <td className="border border-slate-700 ...">
-                  {product.bank}
+                  {product.weight}
                 </td>
+                <td className="border border-slate-700 ...">{product.bank}</td>
                 <td className="border border-slate-700 ...">
                   {product.deposit}
                 </td>
                 <td className="border border-slate-700 ...">
-                  {product.totalPrice}
+                  {product.totalPrice ? product.totalPrice : ""}
                 </td>
                 <td className="border border-slate-700 p-3">
                   <button
                     className="delete-btn"
-                    onClick={() => deleteProduct(index)}
+                    onClick={() => handleDeleteProduct(product._id)}
                   >
                     Delete
                   </button>
@@ -313,17 +302,25 @@ const ProductDetails = () => {
             <tr>
               <td></td>
               <td></td>
-              
+
               <td className="border border-slate-600 bg-yellow-400 ">
-                {products.reduce((acc, curr) => acc + curr.weight, 0) / 1000}
+                {(products.reduce((acc, curr) => acc + curr.weight, 0) / 1000).toString()}
+
               </td>
-              <td className="border border-slate-600 ...">
-                {products.reduce((acc, curr) => acc + curr.totalPrice, 0)}
-               
+              {/* <td className="border border-slate-600 ...">
+                {totalAfterdeposit}
+              </td> */}
+              <td
+                className={`border border-slate-600 ${
+                  totalAfterDeposit < 0 ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                } ...`}
+              >
+                {totalAfterDeposit}
               </td>
+
               <td className="border border-slate-600 ...">
-                {/* {products.reduce((acc, curr) => acc + curr.totalPrice, 0)} */}
-               
+                {/* {products.reduce((acc, curr) => acc + curr.deposit, 0)} */}
+                {totalDepositAmount}
               </td>
             </tr>
           </tfoot>
@@ -334,3 +331,4 @@ const ProductDetails = () => {
 };
 
 export default ProductDetails;
+
