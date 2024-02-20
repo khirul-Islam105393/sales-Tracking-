@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {getCurrentDate} from "../utility/getCurrentDate"
 import "./ProductDetails.css";
 import { postData,deleteProduct } from "../utility/api";
+import Update from "../Update/Update";
 // import { postData } from "../utility/api";
 
 const ProductDetails = () => {
@@ -15,9 +16,10 @@ const ProductDetails = () => {
   const [depositedAmount, setDepositedAmount] = useState(0);
   const [totalDepositedAmount, setTotalDepositedAmount] = useState(0);
   const [reload, setReload] = useState(false);
+
   // Update weight when quantity changes
 
-
+  console.log(reload);
 
 
 
@@ -29,6 +31,8 @@ const ProductDetails = () => {
       setWeight(defaultWeight * quantity);
     }
   }, [quantity]);
+
+
 
   useEffect(() => {
     // Calculate the updated total deposited amount
@@ -43,14 +47,21 @@ const ProductDetails = () => {
     setTotalDepositedAmount(updatedTotalDepositedAmount);
   }, [products, reload]);
 
+
+
+
+
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch('http://localhost:5000/sale');
         if (response.ok) {
           const fetchedData = await response.json();
-      
+          
+           
           setProducts(fetchedData);
+        
         } else {
           throw new Error('Failed to fetch data');
         }
@@ -60,7 +71,7 @@ const ProductDetails = () => {
       }
     };
 
-    fetchData();
+    fetchData ()
   }, [reload]);
 
  
@@ -72,9 +83,7 @@ const ProductDetails = () => {
     if (success) {
       setReload(!reload);
     }
-    setTimeout(()=>{
-      setReload(!reload);
-    },2000)
+ 
     
 };
 
@@ -166,7 +175,7 @@ const ProductDetails = () => {
     setDepositedAmount(0);
   };
 
-  console.log(products);
+
 
   const totalDepositAmount = products.reduce((total, item) => {
     if (typeof item.deposit == "number") {
@@ -188,6 +197,7 @@ const totalAfterDeposit = totalPriceSum !== 0 ? totalPriceSum - totalDepositedAm
 
   return (
     <div className="mt-9 border-red-400">
+    
       <div>
         {" "}
         <input
@@ -224,7 +234,7 @@ const totalAfterDeposit = totalPriceSum !== 0 ? totalPriceSum - totalDepositedAm
           className=" rounded shadow p-1 inputText"
           value={depositedAmount}
           onChange={(e) => setDepositedAmount(e.target.value)}
-          placeholder="money"
+        
         />
         <button onClick={depositAmount} className="deposit-btn">
           Deposit
@@ -274,18 +284,19 @@ const totalAfterDeposit = totalPriceSum !== 0 ? totalPriceSum - totalDepositedAm
                   >
                     Delete
                   </button>
-                  <button
+                  {/* <button
                     className="update-btn mx-2"
                     onClick={() => updateProduct(index)}
                   >
                     Update
+                  </button> */}
+
+
+                  <button>
+                   <Update setReload={setReload} productId={product._id} />
                   </button>
-                  <button
-                    className="edit-btn"
-                    onClick={() => editProduct(index)}
-                  >
-                    Edit
-                  </button>
+
+
                 </td>
               </tr>
             ))}

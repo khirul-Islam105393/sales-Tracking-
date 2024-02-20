@@ -1,15 +1,30 @@
+import { Outlet } from "react-router-dom";
+import "./App.css";
+import Form from "./components/Form";
+import Navbar from "./components/Nabvar/Navbar";
+import { createContext, useState } from "react";
 
-import './App.css'
-import Form from './components/Form';
-import ProductDetails from './components/ProductDetails/ProductDetails';
-
+export const cartContext = createContext()
 const App = () => {
-  
+
+
+  const [cart, setCart]=useState([])
+
+
+ 
+
+
+
   return (
-    <div className='App'>
-      {/* <Form /> */}
-      <ProductDetails />
+    <cartContext.Provider value={{cart, setCart}}>
+
+<div className="App">
+      <Navbar />
+      <Outlet />
     </div>
+
+    </cartContext.Provider>
+   
   );
 };
 
